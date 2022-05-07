@@ -133,14 +133,14 @@ class MaestrosMatrixController extends Controller
         $descripciones = DB::table('root_000030')->where('Dic_Usuario', $tabla_consecutivo[0])->where('Dic_Formulario', $tabla_consecutivo[1])->get(['Dic_Campo', 'Dic_Descripcion']);
 
         // data
-        $data = DB::table($request->tabla)->get();
+        $data = DB::table($request->tabla)->paginate(10);
 
         return response()->json([
             'data' => [
                 'permisos' => $permisos,
                 'detalles' => $detalle,
                 'descripciones' => $descripciones,
-                'data' => $data
+                'datas' => $data
             ],
             'message' => 'Retorno de datos correctos',
             'res' => 'true'
