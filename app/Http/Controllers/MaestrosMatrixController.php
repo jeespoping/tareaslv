@@ -107,7 +107,7 @@ class MaestrosMatrixController extends Controller
 
     public function permisos()
     {
-        $data = DB::table('root_000105')->where('Tabusu', Auth::user()->Codigo)->where('Tabest', 'on')->get(['Tabtab', 'Tabcvi', 'Tabcam', 'Tabpgr', 'Tabopc']);
+        $data = DB::table('root_000105')->where('Tabusu', Auth::user()->Codigo)->where('Tabest', 'on')->orderBy('Tabtab')->get(['Tabtab', 'Tabcvi', 'Tabcam', 'Tabpgr', 'Tabopc']);
 
         return response()->json([
             'data' => $data,
