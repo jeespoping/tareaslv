@@ -127,13 +127,21 @@ class MaestrosMatrixController extends Controller
 
         // detalle
         $tabla_consecutivo = explode('_', $request->tabla);
-        $detalle = DB::table('det_formulario')->where('medico', $tabla_consecutivo[0])->where('codigo', $tabla_consecutivo[1])->where('activo', 'A')->get(['medico', 'codigo', 'campo', 'descripcion', 'tipo', 'posicion', 'comentarios']);
-
-        // descripcion
-        $descripciones = DB::table('root_000030')->where('Dic_Usuario', $tabla_consecutivo[0])->where('Dic_Formulario', $tabla_consecutivo[1])->get(['Dic_Campo', 'Dic_Descripcion']);
+        $detalle = [];
+        $descripciones = [];
+        if (count($tabla_consecutivo) > 1){
+            $detalle = DB::table('det_formulario')->where('medico', $tabla_consecutivo[0])->where('codigo', $tabla_consecutivo[1])->where('activo', 'A')->get(['medico', 'codigo', 'campo', 'descripcion', 'tipo', 'posicion', 'comentarios']);
+            // descripcion
+            $descripciones = DB::table('root_000030')->where('Dic_Usuario', $tabla_consecutivo[0])->where('Dic_Formulario', $tabla_consecutivo[1])->get(['Dic_Campo', 'Dic_Descripcion']);
+        }
 
         // data
-        $data = DB::table($request->tabla)->paginate(10);
+        if ($request->filterText == ""){
+            $data = DB::table($request->tabla)->paginate(10);
+        }else{
+            $data = DB::table($request->tabla)->where($request->valueFilter, $request->condicionFilter, $request->filterText)->paginate(10);
+        }
+
 
         return response()->json([
             'data' => [
