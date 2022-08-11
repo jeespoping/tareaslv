@@ -134,7 +134,16 @@ class MaestrosMatrixController extends Controller
         ->get(['medico', 'codigo', 'campo', 'descripcion', 'tipo', 'posicion', 'comentarios']);
         $descripciones = DB::table('root_000030')->where('Dic_Usuario', $tabla_consecutivo[0])->where('Dic_Formulario', $tabla_consecutivo[1])->get(['Dic_Campo', 'Dic_Descripcion']);
         
-        $data = DB::table($request->tabla)->paginate(10);
+        $data = DB::table($request->tabla);
+        if($request->condicionFilter && $request->filterText && $request->valueFilter){
+            if($request->condicionFilter == 'like'){
+                $data->where($request->valueFilter, 'LIKE', '%'.$request->filterText.'%');
+            }else{
+                $data->where($request->valueFilter, $request->condicionFilter, $request->filterText);
+            }
+        }
+
+        $data = $data->paginate(10);
 
         foreach($data as $elem){
             $position = 0;
@@ -154,6 +163,20 @@ class MaestrosMatrixController extends Controller
                 $position_data_start++;
             }
         }
+
+        $keyExists = DB::select(
+            DB::raw(
+                'SHOW KEYS
+                FROM '.$request->tabla           
+            )
+        );
+        foreach($detalle as $value){
+            if($this->isIndex($keyExists, $value->descripcion)){
+                $value->isIndex = 1;
+            }else{
+                $value->isIndex = 0;
+            }
+        }
         
         return response()->json([
             'data' => [
@@ -165,6 +188,15 @@ class MaestrosMatrixController extends Controller
             'message' => 'Retorno de datos correctos',
             'res' => 'true'
         ]);
+    }
+
+    public function isIndex($keyExists, $column){
+        foreach($keyExists as $key){
+            if($key->Column_name == $column){
+                return true;
+            }
+        }
+        return false;
     }
 
     public function searchDescripcion($detalle, $key){
